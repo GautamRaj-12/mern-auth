@@ -1,7 +1,10 @@
 import React from 'react';
 import './mix.css';
+import { useState } from 'react';
+import { useScrollTrigger } from '@mui/material';
 
 const Login = () => {
+  const [passShow, setPassShow] = useState(false);
   return (
     <>
       <section>
@@ -24,12 +27,19 @@ const Login = () => {
               <label htmlFor='password'>Password</label>
               <div className='two'>
                 <input
-                  type='password'
+                  type={!passShow ? 'password' : 'text'}
                   name='password'
                   id='password'
                   placeholder='Enter password'
                 />
-                <div className='showpass'>Show</div>
+                <div
+                  className='showpass'
+                  onClick={() => {
+                    setPassShow(!passShow);
+                  }}
+                >
+                  {!passShow ? 'Show' : 'Hide'}
+                </div>
               </div>
             </div>
             <button className='btn'>Login</button>
