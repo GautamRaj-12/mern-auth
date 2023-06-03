@@ -1,7 +1,6 @@
 import React from 'react';
 import './mix.css';
 import { useState } from 'react';
-import { useScrollTrigger } from '@mui/material';
 
 const Login = () => {
   const [passShow, setPassShow] = useState(false);
