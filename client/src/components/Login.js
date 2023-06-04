@@ -1,6 +1,7 @@
 import React from 'react';
 import './mix.css';
 import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 
 const Login = () => {
   const [passShow, setPassShow] = useState(false);
@@ -42,7 +43,9 @@ const Login = () => {
               </div>
             </div>
             <button className='btn'>Login</button>
-            <p>Don't have an account? Sign Up</p>
+            <p>
+              Don't have an account? <NavLink to='/register'>Sign Up</NavLink>
+            </p>
           </form>
         </div>
       </section>
