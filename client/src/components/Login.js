@@ -5,6 +5,39 @@ import { NavLink } from 'react-router-dom';
 
 const Login = () => {
   const [passShow, setPassShow] = useState(false);
+
+  const [inpval, setinpval] = useState({
+    email: '',
+    password: '',
+  });
+
+  const setVal = (e) => {
+    // console.log(e.target.value);
+    const { name, value } = e.target;
+    setinpval(() => {
+      return {
+        ...inpval,
+        [name]: value,
+      };
+    });
+  };
+
+  const loginuser = (e) => {
+    e.preventDefault();
+    const { email, password } = inpval;
+
+    if (email === '') {
+      alert('please enter your email');
+    } else if (!email.includes('@')) {
+      alert('enter valid email');
+    } else if (password === '') {
+      alert('please enter your password');
+    } else if (password.length < 6) {
+      alert('password must include 6 characters');
+    } else {
+      alert('User login successfully done');
+    }
+  };
   return (
     <>
       <section>
@@ -18,6 +51,8 @@ const Login = () => {
               <label htmlFor='email'>Email</label>
               <input
                 type='email'
+                onChange={setVal}
+                value={inpval.email}
                 name='email'
                 id='email'
                 placeholder='Enter your email address'
@@ -28,6 +63,8 @@ const Login = () => {
               <div className='two'>
                 <input
                   type={!passShow ? 'password' : 'text'}
+                  onChange={setVal}
+                  value={inpval.password}
                   name='password'
                   id='password'
                   placeholder='Enter password'
@@ -42,7 +79,9 @@ const Login = () => {
                 </div>
               </div>
             </div>
-            <button className='btn'>Login</button>
+            <button className='btn' onClick={loginuser}>
+              Login
+            </button>
             <p>
               Don't have an account? <NavLink to='/register'>Sign Up</NavLink>
             </p>
