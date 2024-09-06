@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   const { email, fullName, password } = req.body;
@@ -46,12 +47,38 @@ const loginUser = async (req, res) => {
       return res.status(401), json({ message: "Invalid Credentials" });
     }
 
-    const loggedInUser = await User.findById(foundUser._id).select("-password");
+    const accessToken = jwt.sign(
+      { email: foundUser.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+    const refreshToken = jwt.sign(
+      { email: foundUser.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
 
-    return res.status(200).json({
-      message: "Login Successfull",
-      data: { loggedInUser },
-    });
+    foundUser.refreshToken = refreshToken;
+    await foundUser.save({ validateBeforeSave: false });
+
+    const loggedInUser = await User.findById(foundUser._id).select(
+      "-password -refreshToken"
+    );
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        message: "Login Successfull",
+        data: { loggedInUser },
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
