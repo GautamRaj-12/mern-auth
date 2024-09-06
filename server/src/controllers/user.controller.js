@@ -28,4 +28,33 @@ const registerUser = async (req, res) => {
   }
 };
 
-export { registerUser };
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const foundUser = await User.findOne({ email });
+
+    if (!foundUser) {
+      return res.status(404).json({ message: "User does not exist" });
+    }
+
+    const isPasswordValid = await foundUser.isPasswordCorrect(password);
+
+    if (!isPasswordValid) {
+      return res.status(401), json({ message: "Invalid Credentials" });
+    }
+
+    const loggedInUser = await User.findById(foundUser._id).select("-password");
+
+    return res.status(200).json({
+      message: "Login Successfull",
+      data: { loggedInUser },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { registerUser, loginUser };
