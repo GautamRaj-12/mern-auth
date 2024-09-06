@@ -23,7 +23,9 @@ const registerUser = async (req, res) => {
       message: "User Registered Successfully",
       data: { userDataToSend },
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export { registerUser };
