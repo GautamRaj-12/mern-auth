@@ -55,7 +55,7 @@ const loginUser = async (req, res) => {
     const refreshToken = jwt.sign(
       { _id: foundUser._id, email: foundUser.email },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "30s" }
     );
 
     foundUser.refreshToken = refreshToken;
@@ -84,9 +84,57 @@ const loginUser = async (req, res) => {
   }
 };
 
+const handleRefreshToken = async (req, res) => {
+  const refreshToken =
+    req.cookies?.refreshToken ||
+    req.header("Authorization")?.replace("Bearer ", "");
+
+  try {
+    // Check if the refresh token exists
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh token is missing" });
+    }
+
+    // Verify the refresh token
+    const decodedRefreshToken = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // Find the user by decoded token's ID
+    const user = await User.findById(decodedRefreshToken._id);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    // Generate a new access token
+    const newAccessToken = jwt.sign(
+      { _id: user._id, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "10s" } // Short expiration for access tokens
+    );
+
+    // Return the new tokens
+    const options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", newAccessToken, options)
+      .json({ message: "Token refreshed", accessToken: newAccessToken });
+  } catch (error) {
+    return res
+      .status(403)
+      .json({ message: "Refresh token is invalid or expired" });
+  }
+};
+
 const protectedRoute = (req, res, next) => {
   console.log("This is a protected route");
   res.status(200).json({ message: "Accessed protected route" }); // Use res here
 };
 
-export { registerUser, loginUser, protectedRoute };
+export { registerUser, loginUser, protectedRoute, handleRefreshToken };
