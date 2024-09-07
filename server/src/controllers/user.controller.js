@@ -44,18 +44,18 @@ const loginUser = async (req, res) => {
     const isPasswordValid = await foundUser.isPasswordCorrect(password);
 
     if (!isPasswordValid) {
-      return res.status(401), json({ message: "Invalid Credentials" });
+      return res.status(401).json({ message: "Invalid Credentials" });
     }
 
     const accessToken = jwt.sign(
-      { email: foundUser.email },
+      { _id: foundUser._id, email: foundUser.email },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+      { expiresIn: "10s" }
     );
     const refreshToken = jwt.sign(
-      { email: foundUser.email },
+      { _id: foundUser._id, email: foundUser.email },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+      { expiresIn: "1d" }
     );
 
     foundUser.refreshToken = refreshToken;
@@ -84,4 +84,9 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser };
+const protectedRoute = (req, res, next) => {
+  console.log("This is a protected route");
+  res.status(200).json({ message: "Accessed protected route" }); // Use res here
+};
+
+export { registerUser, loginUser, protectedRoute };
