@@ -132,7 +132,7 @@ const handleRefreshToken = async (req, res) => {
   }
 };
 
-const protectedRoute = (req, res, next) => {
+const protectedRoute = (res) => {
   console.log("This is a protected route");
   res.status(200).json({ message: "Accessed protected route" }); // Use res here
 };
