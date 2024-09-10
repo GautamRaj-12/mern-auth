@@ -132,6 +132,36 @@ const handleRefreshToken = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password -refreshToken");
+    if (!users) {
+      return res.status(404).json({ message: "No users found" });
+    }
+    res.status(200).json({ message: "All Users Fetched", data: users });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getSingleUser = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const singleUser = await User.findOne({ email });
+    if (!singleUser) {
+      return res
+        .status(404)
+        .json({ message: "Couldn't find user with the specified email" });
+    }
+    const userDataToSend = await User.findOne({ email }).select(
+      "-password -refreshToken"
+    );
+    res.status(200).json({ message: "User Fetched", data: userDataToSend });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const protectedRoute = (req, res) => {
   console.log("This is a protected route");
   res.status(200).json({ message: "Accessed protected route" });
@@ -174,5 +204,7 @@ export {
   loginUser,
   protectedRoute,
   handleRefreshToken,
+  getAllUsers,
+  getSingleUser,
   assignRole,
 };
